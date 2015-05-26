@@ -1,1 +1,1 @@
-# sitemap-diag
+# Sitemap diagnose tool for Python
