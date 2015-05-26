@@ -170,7 +170,7 @@ def print_sitemap_issues(problematicLocations, domainname):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1: # The 0th arg is the module filename
+    if len(sys.argv) <= 1: # The 0th arg is the module filename
         print ('Format should be "python3 sitemap_diag.py [Sitemap URL]"')
         sys.exit()
 
