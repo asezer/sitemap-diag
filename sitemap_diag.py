@@ -8,7 +8,11 @@ Usage:
 import sys
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
+try:
+	from urllib import parse as urlparse
+except ImportError:
+	# Python 2
+	import urlparse
 
 def main(sitemapUrl):
 	"""Main module execution logic
@@ -16,7 +20,8 @@ def main(sitemapUrl):
 	Args:
 		sitemap.xml Url
 	"""
-	sitemap = sitemap_fetch(sitemapUrl)
+	sitemap_url = extract_url(sitemapUrl)
+	sitemap = sitemap_fetch(sitemap_url)
 
 	sitemapLocations = fetch_locations_from_sitemap(sitemap)
 
@@ -29,8 +34,40 @@ def main(sitemapUrl):
 	sitemapLocations, problematicLocations = sitemap_check_dublicate(sitemapLocations)
 	problematicLocations += sitemap_check_accessibility(sitemapLocations)
 
-	parse_object = urlparse(sitemapUrl)
-	print_sitemap_issues(problematicLocations, parse_object.netloc)
+	print_sitemap_issues(problematicLocations, sitemap_url)
+
+
+def extract_url(url):
+	"""Format the Url to http://example.com/sitemap.xml
+
+	Args:
+		Given sitemap url from console
+
+	Returns:
+		Formated sitemap url
+	"""
+	parts = urlparse.urlsplit(url)
+
+	if parts.scheme == '':
+		scheme = 'http'
+	else:
+		scheme = parts.scheme
+
+	urlpath = parts.path.split('/')
+	if parts.netloc == '':
+		netloc = urlpath[0]
+	else:
+		netloc = parts.netloc
+
+	if len(urlpath) == 1:
+		path = "sitemap.xml"
+	else:
+		path = urlpath[1]
+
+	needed_parts = urlparse.SplitResult(scheme=scheme, netloc=netloc, path=path, 
+	    query='', fragment='')
+
+	return needed_parts.geturl()
 
 
 def sitemap_fetch(sitemapUrl):
@@ -48,7 +85,7 @@ def sitemap_fetch(sitemapUrl):
 
 		return soup
 	except:
-		print ("Cannot fetch sitemap", sys.exc_info()[0])
+		print("Cannot fetch sitemap ", sitemapUrl)
 		sys.exit()
 
 
