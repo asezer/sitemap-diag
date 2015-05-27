@@ -48,21 +48,12 @@ def extract_url(url):
     """
     parts = urlparse.urlsplit(url)
 
-    if parts.scheme == '':
-        scheme = 'http'
-    else:
-        scheme = parts.scheme
+    scheme = 'http' if parts.scheme == '' else parts.scheme
 
     urlpath = parts.path.split('/')
-    if parts.netloc == '':
-        netloc = urlpath[0]
-    else:
-        netloc = parts.netloc
 
-    if len(urlpath) == 1:
-        path = "sitemap.xml"
-    else:
-        path = urlpath[1]
+    netloc = urlpath[0] if parts.netloc == '' else parts.netloc
+    path = "sitemap.xml" if len(urlpath) == 1 else urlpath[1]
 
     needed_parts = urlparse.SplitResult(scheme=scheme, netloc=netloc, path=path, 
         query='', fragment='')
@@ -145,7 +136,8 @@ def sitemap_check_accessibility(locations):
             if r.status_code == 404: #maybe the URL doesn't response to HEAD request
                 tmp = requests.get(loc) #let's try GET request
                 if tmp.status_code != 200:
-                    problematicLocations.append("Status Code: {0} Url:{1}".format(r.status_code, loc))
+                    problematicLocations.append("Status Code: {0} Url:{1}"
+                        .format(r.status_code, loc))
             else:
                 problematicLocations.append("Status Code: {0} Url:{1}".format(r.status_code, loc))
 
